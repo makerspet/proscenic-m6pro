@@ -10,11 +10,12 @@
   <xacro:property name="caster_diameter" value="0.025"/>
   <!-- Caster center to base edge -->
   <xacro:property name="caster_inset" value="0.030"/>
-  <xacro:property name="floor_clearance" value="0.010"/>
+  <xacro:property name="floor_clearance" value="0.0125"/>
   <xacro:property name="base_diameter" value="0.349"/>
   <xacro:property name="wheel_base" value="0.235"/>
-  <!-- Flat vacuum body cylinder, measured 79mm tall (LiDAR housing on top) -->
-  <xacro:property name="lower_cylinder_height" value="0.079"/>
+  <!-- Body cylinder: top is 79mm above the floor, minus 12.5mm floor gap = 66.5mm tall.
+       LiDAR housing sits on top (body top 79mm + 18mm housing = ~97mm total height). -->
+  <xacro:property name="lower_cylinder_height" value="0.0665"/>
   <!-- LiDAR housing, measured 18mm, seated flush on the body top -->
   <xacro:property name="laser_puck_height" value="0.018"/>
   <xacro:property name="laser_puck_diameter" value="0.083"/>
