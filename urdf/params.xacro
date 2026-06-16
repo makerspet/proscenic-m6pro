@@ -2,17 +2,17 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- ****************** ROBOT DIMENSIONS ****************** -->
   <!-- Units: meters, degrees, kg, N*m, m/s2 -->
-  <!-- Proscenic M6 Pro: round body ~349mm dia, ~95mm tall (incl. LiDAR turret). -->
-  <!-- wheel_base 0.233m matches vacuum_ros2_bridge WHEEL_BASE used for odometry. -->
-  <!-- Values are approximate; refine against measurements of the physical robot. -->
-  <xacro:property name="wheel_diameter" value="0.065"/>
+  <!-- Proscenic M6 Pro: round body 349mm dia (measured), ~95mm tall (incl. LiDAR turret). -->
+  <!-- wheel_base = measured wheel track 235mm. The bridge uses its own odometry
+       constant WHEEL_BASE = 0.233m (2mm less); negligible, calibrate empirically. -->
+  <xacro:property name="wheel_diameter" value="0.068"/>
   <xacro:property name="wheel_width" value="0.012"/>
   <xacro:property name="caster_diameter" value="0.025"/>
   <!-- Caster center to base edge -->
   <xacro:property name="caster_inset" value="0.030"/>
   <xacro:property name="floor_clearance" value="0.010"/>
   <xacro:property name="base_diameter" value="0.349"/>
-  <xacro:property name="wheel_base" value="0.233"/>
+  <xacro:property name="wheel_base" value="0.235"/>
   <!-- Flat vacuum body height (LiDAR turret adds on top) -->
   <xacro:property name="lower_cylinder_height" value="0.072"/>
   <!-- LiDAR turret/puck on top of the body -->
@@ -20,10 +20,9 @@
   <xacro:property name="laser_puck_diameter" value="0.070"/>
   <xacro:property name="laser_puck_offset" value="0.005"/>
   <!-- LiDAR turret sits toward the REAR of the vacuum, not centered.
-       +X is forward, so a negative value shifts it back. Refine by measuring
-       the horizontal distance from the robot center to the LiDAR center and
-       setting this to its negative (meters). -->
-  <xacro:property name="lidar_center_offset" value="-0.13"/>
+       +X is forward, so negative shifts it back. Measured: LiDAR center is
+       78mm in from the rear edge -> 174.5mm radius - 78mm = 96.5mm behind center. -->
+  <xacro:property name="lidar_center_offset" value="-0.0965"/>
 
   <!-- N*m -->
   <xacro:property name="motor_stall_torque" value="0.5"/>
