@@ -21,7 +21,7 @@
       <geometry>
         <cylinder length="${lower_cylinder_height}" radius="${base_diameter/2}"/>
       </geometry>
-      <material name="white"/>
+      <material name="light_gray"/>
     </visual>
 
     <collision>
@@ -46,7 +46,7 @@
       <geometry>
         <sphere radius="${caster_diameter/2}"/>
       </geometry>
-      <material name="white"/>
+      <material name="light_gray"/>
     </visual>
 
    <collision>

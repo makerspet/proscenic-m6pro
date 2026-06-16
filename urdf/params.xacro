@@ -19,7 +19,11 @@
   <xacro:property name="laser_puck_height" value="0.018"/>
   <xacro:property name="laser_puck_diameter" value="0.070"/>
   <xacro:property name="laser_puck_offset" value="0.005"/>
-  <xacro:property name="lidar_center_offset" value="0.000"/>
+  <!-- LiDAR turret sits toward the REAR of the vacuum, not centered.
+       +X is forward, so a negative value shifts it back. Refine by measuring
+       the horizontal distance from the robot center to the LiDAR center and
+       setting this to its negative (meters). -->
+  <xacro:property name="lidar_center_offset" value="-0.13"/>
 
   <!-- N*m -->
   <xacro:property name="motor_stall_torque" value="0.5"/>
