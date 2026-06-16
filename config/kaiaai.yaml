@@ -1,6 +1,6 @@
 robot_model:
-  name: makerspet_mini
-  manufacturer: makerspet.com
+  name: proscenic_m6pro
+  manufacturer: Proscenic
   speed:
     mapping: 0.1
     max: 0.2

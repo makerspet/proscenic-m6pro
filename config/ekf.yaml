@@ -1,0 +1,52 @@
+# robot_localization EKF for the Proscenic M6 Pro.
+#
+# Purpose: publish the odom -> base_footprint transform that
+# vacuum_ros2_bridge does NOT provide (it publishes only the /odom topic) and
+# that cartographer requires (its config has provide_odom_frame = false).
+#
+# Inputs (from vacuum_ros2_bridge):
+#   /odom : nav_msgs/Odometry  - wheel odometry; we fuse its velocities (vx, vyaw)
+#   /imu  : sensor_msgs/Imu     - we fuse yaw rate (angular_velocity.z); the bridge
+#                                 IMU has no orientation (orientation_covariance[0] = -1)
+#
+# Fusing velocities (not absolute pose) keeps the filter stable against the
+# wheel-odometry yaw drift the makerspet tutorial warns about, while the IMU
+# yaw rate sharpens heading. Tune covariances / enable accel if heading is noisy.
+
+ekf_filter_node:
+  ros__parameters:
+    frequency: 30.0
+    sensor_timeout: 0.1
+    two_d_mode: true
+    transform_time_offset: 0.0
+    transform_timeout: 0.0
+    publish_tf: true
+    print_diagnostics: false
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    # Wheel odometry: fuse linear-x velocity and yaw rate.
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  false, false,
+                   false, false, true,
+                   false, false, false]
+    odom0_differential: false
+    odom0_relative: false
+    odom0_queue_size: 10
+
+    # IMU: fuse yaw rate only (no orientation available from the bridge).
+    imu0: /imu
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]
+    imu0_differential: false
+    imu0_relative: false
+    imu0_queue_size: 10
+    imu0_remove_gravitational_acceleration: true

@@ -1,66 +1,58 @@
-# Maker's Pet Mini ROS2 educational robot
+# Proscenic M6 Pro — ROS 2 robot description
 
-A 124mm DIY 3D-printable pet robot compatible with [Kaia.ai](https://kaia.ai) software [platform](https://github.com/kaiaai/). 3D print, build, run and mod your own home pet robot! Please learn more at [Maker's Pet](https://makerspet.com), [REMAKE.AI](https://remake.ai) and join our [FB group](https://www.facebook.com/groups/243730868651472/).
+ROS 2 robot description and configuration for the **Proscenic M6 Pro** robot vacuum,
+integrated with the [Kaia.ai](https://kaia.ai) software [platform](https://github.com/kaiaai/).
 
-Questions? Please visit the [Support Forum](https://github.com/makerspet/support/discussions/)!
+Unlike the ESP32 + [micro-ROS](https://micro.ros.org/) Maker's Pet robots, the Proscenic
+M6 Pro is a stock commercial vacuum. It is bridged to ROS 2 by
+[`remakeai/vacuum_ros2_bridge`](https://github.com/remakeai/vacuum_ros2_bridge), which talks
+to the on-board **SangamIO** daemon (part of [VacuumTiger](https://github.com/codetiger/VacuumTiger))
+over TCP port 5555. Setup is documented in this
+[tutorial](https://makerspet.com/blog/tutorial-connect-robot-vacuum-cleaner-to-ros-2-proscenic-m6-pro/).
 
-Please install these Arduino libraries (using Arduino Library Manager) before building this firmware:
-- [micro_ros_kaia](https://github.com/kaiaai/micro_ros_arduino_kaiaai)
-- [LDS](https://github.com/kaiaai/LDS/)
-- [PID_Timed](https://github.com/kaiaai/arduino_pid_timed)
-- ESPAsyncWebSrv including AsyncTCP, ESPAsyncTCP
+```
+Proscenic M6 Pro (SangamIO, TCP 5555) <--Wi-Fi/LAN--> PC (vacuum_ros2_bridge) <--> ROS 2
+```
 
-Supported laser distance scan sensors:
-- YDLIDAR X4, X3, X3-PRO, X2/X2L
-- Neato XV11
-- LDS02RR from Xiaomi 1st gen vacuum cleaners (~$15 used off AliExpress including shipping)
-- RPLIDAR A1
+## Package contents
+- `urdf/` — xacro description of the ~349 mm round vacuum (body + LiDAR turret, diff-drive
+  wheels, caster). Frames follow the Kaia.ai convention: `base_footprint → base_link → base_scan`.
+- `config/ekf.yaml` — `robot_localization` EKF that fuses `/odom` + `/imu` and publishes the
+  `odom → base_footprint` transform (the bridge publishes the `/odom` topic but not this TF,
+  which cartographer requires).
+- `config/cartographer_lds_2d.lua`, `config/navigation.yaml`, … — SLAM / Nav2 tuning.
+- `config/gz_bridge.yaml`, `urdf/plugins.xacro` — Gazebo simulation (diff-drive, odometry,
+  gpu_lidar) — simulation does **not** use the bridge.
+- `launch/bringup.launch.py` — physical bring-up: bridge + `robot_state_publisher` + EKF.
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/a637f379-5ba2-4407-a00a-5fa81ebb6755" width="48%" alt="Mini robot in glossy red"/>
-  <img src="https://github.com/user-attachments/assets/2b487792-3971-44b3-9905-d726304c440e" width="48%" alt="Mini robot in glossy purple"/> 
-</p>
+## Usage
 
-## Assembly instructions video
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=WPB2B1DPf_s" target="_blank">
- <img src="http://img.youtube.com/vi/WPB2B1DPf_s/maxresdefault.jpg" alt="Watch the assembly instructions video" width="720" height="405" border="10" />
-</a>
+Select the robot model (used by the shared Kaia.ai launch files):
+```
+kaia config robot.model proscenic_m6pro
+```
 
-## PC, firmware setup instructions video
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=XOc5kCE3MC0" target="_blank">
- <img src="http://img.youtube.com/vi/XOc5kCE3MC0/maxresdefault.jpg" alt="Watch the one-time PC setup, firmware upload instructions video" width="720" height="405" border="10" />
-</a>
+### Simulation (no robot needed)
+```
+ros2 launch kaiaai_gazebo world.launch.py
+ros2 launch kaiaai_bringup navigation.launch.py use_sim_time:=true slam:=True
+ros2 run kaiaai_teleop teleop_keyboard
+```
 
-## Bring-up instructions video
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=L_XbkA4pwRc" target="_blank">
- <img src="http://img.youtube.com/vi/L_XbkA4pwRc/maxresdefault.jpg" alt="Watch the bring-up instructions video" width="720" height="405" border="10" />
-</a>
+### Physical robot
+The robot must be on the LAN running SangamIO (see the tutorial for flashing/Wi-Fi).
+```
+ros2 launch proscenic_m6pro bringup.launch.py robot_ip:=<robot-ip>
+ros2 launch kaiaai_bringup navigation.launch.py slam:=True
+ros2 run kaiaai_teleop teleop_keyboard
+ros2 run nav2_map_server map_saver_cli -f ~/maps/map
+```
 
-## 3D printing instructions
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=4k6W1QyJMMw" target="_blank">
- <img src="http://img.youtube.com/vi/L_XbkA4pwRc/maxresdefault.jpg" alt="Watch the bring-up instructions video" width="720" height="405" border="10" />
-</a>
+## Notes
+- URDF dimensions are approximate (~349 mm diameter, ~95 mm height, 0.233 m wheel base to
+  match the bridge's odometry). Refine against measurements of your robot.
+- Vacuum-specific actuators (vacuum/brushes/water pump, LEDs) are exposed by the bridge via
+  `/set_actuator`, `/set_led`, `/set_lidar` and the `/actuator_cmd`, `/led_cmd` topics.
 
-## Arduino ESP32 breakout board setup instructions
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=zizGI8MjANU" target="_blank">
- <img src="http://img.youtube.com/vi/zizGI8MjANU/maxresdefault.jpg" alt="Watch the Arduino ESP32 breakout board setup instructions video" width="720" height="405" border="10" />
-</a>
-
-## Features
-- room mapping using a 360-degree laser distance sensor (ROS2-based).
-- autonomous self-driving (ROS2-based).
-- code your character, skills (work in progress)
-- 3D-printable, 200mm round base
-- Arduino ESP32 micro-controller
-
-## Instructions
-- 3D printing [STL](https://github.com/makerspet/3d_models/tree/main/loki_200mm/stl), [3MF](https://github.com/makerspet/3d_models/tree/main/loki_200mm/3mf)
-- Arduino ESP32 [firmware](https://github.com/kaiaai/firmware)
-- PC end user and developer [setup](https://github.com/kaiaai/docker)
-- KiCad [schematic, PCB](https://github.com/makerspet/pcb)
-- Software setup, configuration [instructions](https://www.youtube.com/playlist?list=PLOSXKDW70aR8SA16wTB0ou9ClKhv7micy)
-- Fusion 360 3D CAD [design files](https://github.com/makerspet/3d_models/tree/main/loki_200mm/fusion360)
-- ROS2 software mod [instructions](https://github.com/makerspet/makerspet_loki/tree/main/urdf)
-
-## Open-source design
-Authored in Fusion 360. Printed using a Prusa MK3S+.
+## License
+Apache 2.0
