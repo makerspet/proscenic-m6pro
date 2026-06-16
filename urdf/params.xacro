@@ -13,12 +13,13 @@
   <xacro:property name="floor_clearance" value="0.010"/>
   <xacro:property name="base_diameter" value="0.349"/>
   <xacro:property name="wheel_base" value="0.235"/>
-  <!-- Flat vacuum body height (LiDAR turret adds on top) -->
-  <xacro:property name="lower_cylinder_height" value="0.072"/>
-  <!-- LiDAR turret/puck on top of the body -->
+  <!-- Flat vacuum body cylinder, measured 79mm tall (LiDAR housing on top) -->
+  <xacro:property name="lower_cylinder_height" value="0.079"/>
+  <!-- LiDAR housing, measured 18mm, seated flush on the body top -->
   <xacro:property name="laser_puck_height" value="0.018"/>
-  <xacro:property name="laser_puck_diameter" value="0.070"/>
-  <xacro:property name="laser_puck_offset" value="0.005"/>
+  <xacro:property name="laser_puck_diameter" value="0.083"/>
+  <!-- offset = laser_puck_height/2 so the housing bottom sits at the body top -->
+  <xacro:property name="laser_puck_offset" value="0.009"/>
   <!-- LiDAR turret sits toward the REAR of the vacuum, not centered.
        +X is forward, so negative shifts it back. Measured: LiDAR center is
        78mm in from the rear edge -> 174.5mm radius - 78mm = 96.5mm behind center. -->
