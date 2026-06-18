@@ -7,6 +7,27 @@
 
   <!-- ****************** **************** ****************** -->
 
+  <!-- Front bumper half as a thin box tangent to the body, placed on base_link
+       as a NAMED collision (so the Gazebo contact sensor can reference it
+       without fixed-joint lumping renaming it). 'angle' is degrees from front. -->
+  <xacro:macro name="front_bumper" params="name angle">
+    <visual>
+      <origin xyz="${(base_diameter/2)*cos(angle*DEG2RAD)} ${(base_diameter/2)*sin(angle*DEG2RAD)} ${bumper_z}"
+              rpy="0 0 ${(angle+90)*DEG2RAD}"/>
+      <geometry>
+        <box size="${bumper_length} ${bumper_thickness} ${bumper_height}"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <collision name="${name}">
+      <origin xyz="${(base_diameter/2)*cos(angle*DEG2RAD)} ${(base_diameter/2)*sin(angle*DEG2RAD)} ${bumper_z}"
+              rpy="0 0 ${(angle+90)*DEG2RAD}"/>
+      <geometry>
+        <box size="${bumper_length} ${bumper_thickness} ${bumper_height}"/>
+      </geometry>
+    </collision>
+  </xacro:macro>
+
   <link name="base_footprint"/>
 
   <joint name="base_joint" type="fixed">
@@ -21,7 +42,7 @@
       <geometry>
         <cylinder length="${lower_cylinder_height}" radius="${base_diameter/2}"/>
       </geometry>
-      <material name="light_gray"/>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -30,6 +51,10 @@
         <cylinder length="${lower_cylinder_height}" radius="${base_diameter/2}"/>
       </geometry>
     </collision>
+
+    <!-- Front bumpers as named collisions on base_link (see macro above) -->
+    <xacro:front_bumper name="bumper_left_collision" angle="${bumper_angle}"/>
+    <xacro:front_bumper name="bumper_right_collision" angle="${-bumper_angle}"/>
 
     <xacro:solid_cylinder_inertia m="${lower_cylinder_mass}" r="${base_diameter/2}" h="${lower_cylinder_height}"/>
   </link>
@@ -46,7 +71,7 @@
       <geometry>
         <sphere radius="${caster_diameter/2}"/>
       </geometry>
-      <material name="light_gray"/>
+      <material name="grey"/>
     </visual>
 
    <collision>

@@ -41,10 +41,6 @@
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
 
-  <material name="light_gray">
-    <color rgba="0.8 0.8 0.8 1.0"/>
-  </material>
-
   <gazebo reference="wheel_left_link">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>

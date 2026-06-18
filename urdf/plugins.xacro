@@ -28,6 +28,33 @@
       <joint_name>wheel_left_joint</joint_name>
       <joint_name>wheel_right_joint</joint_name>
     </plugin>
+
+    <!-- Processes the bumper contact sensors below. NOTE: the Contact system is
+         normally a WORLD-level system. If the bumper contact topics don't appear,
+         add this same plugin to the Gazebo world (kaiaai_gazebo living_room.world). -->
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
+  </gazebo>
+
+  <!-- Front bumper contact sensors. They watch the named bumper collisions on
+       base_link (see robot.urdf.xacro) and publish gz.msgs.Contacts, bridged to
+       ROS as ros_gz_interfaces/msg/Contacts (see config/gz_bridge.yaml). -->
+  <gazebo reference="base_link">
+    <sensor name="bumper_left" type="contact">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <contact>
+        <collision>bumper_left_collision</collision>
+      </contact>
+      <topic>bumper_left/contact</topic>
+    </sensor>
+    <sensor name="bumper_right" type="contact">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <contact>
+        <collision>bumper_right_collision</collision>
+      </contact>
+      <topic>bumper_right/contact</topic>
+    </sensor>
   </gazebo>
 
   <!-- gazebo reference="laser_frame" -->

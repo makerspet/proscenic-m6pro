@@ -39,3 +39,17 @@
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
+
+# Front bumper contact sensors (gz contact -> ROS). Note: this is the sim-only
+# representation; the physical robot publishes /bumper (vacuum_ros2_bridge/Bumper).
+- ros_topic_name: "bumper_left/contact"
+  gz_topic_name: "bumper_left/contact"
+  ros_type_name: "ros_gz_interfaces/msg/Contacts"
+  gz_type_name: "gz.msgs.Contacts"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "bumper_right/contact"
+  gz_topic_name: "bumper_right/contact"
+  ros_type_name: "ros_gz_interfaces/msg/Contacts"
+  gz_type_name: "gz.msgs.Contacts"
+  direction: GZ_TO_ROS

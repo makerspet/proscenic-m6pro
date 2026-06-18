@@ -36,5 +36,13 @@
   <xacro:property name="laser_puck_mass" value="0.150"/>
   <!-- ****************** **************** ****************** -->
 
+  <!-- Front bumpers (left/right halves), approximated as thin boxes hugging the
+       front perimeter. Geometry is a rough placeholder - refine visually in sim. -->
+  <xacro:property name="bumper_angle" value="35"/>    <!-- deg from front for each half -->
+  <xacro:property name="bumper_length" value="0.13"/> <!-- tangential -->
+  <xacro:property name="bumper_thickness" value="0.012"/> <!-- radial -->
+  <xacro:property name="bumper_height" value="0.045"/>
+  <xacro:property name="bumper_z" value="0.022"/>     <!-- center height in base_link frame -->
+
   <xacro:property name="DEG2RAD" value="0.0174533"/>
 </robot>
