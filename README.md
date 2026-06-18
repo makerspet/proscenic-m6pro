@@ -3,6 +3,8 @@
 ROS 2 robot description and configuration for the **Proscenic M6 Pro** robot vacuum,
 integrated with the [Kaia.ai](https://kaia.ai) software [platform](https://github.com/kaiaai/).
 
+![Proscenic M6 Pro robot vacuum cleaner](https://makerspet.com/wp-content/uploads/2026/06/proscenic_m6_pro_ros2_floor.webp)
+
 Unlike the ESP32 + [micro-ROS](https://micro.ros.org/) Maker's Pet robots, the Proscenic
 M6 Pro is a stock commercial vacuum. It is bridged to ROS 2 by
 [`remakeai/vacuum_ros2_bridge`](https://github.com/remakeai/vacuum_ros2_bridge), which talks
