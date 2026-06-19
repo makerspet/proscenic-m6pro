@@ -7,25 +7,35 @@
 
   <!-- ****************** **************** ****************** -->
 
-  <!-- Front bumper half as a thin box tangent to the body, placed on base_link
-       as a NAMED collision (so the Gazebo contact sensor can reference it
-       without fixed-joint lumping renaming it). 'angle' is degrees from front. -->
-  <xacro:macro name="front_bumper" params="name angle">
+  <!-- One bumper facet: a thin box tangent to the body at angle 'ang' (deg from
+       front), at the body radius. Named collision so the contact sensor can list it. -->
+  <xacro:macro name="bumper_facet" params="prefix idx ang width">
     <visual>
-      <origin xyz="${(base_diameter/2)*cos(angle*DEG2RAD)} ${(base_diameter/2)*sin(angle*DEG2RAD)} ${bumper_z}"
-              rpy="0 0 ${(angle+90)*DEG2RAD}"/>
+      <origin xyz="${(base_diameter/2)*cos(ang*DEG2RAD)} ${(base_diameter/2)*sin(ang*DEG2RAD)} ${bumper_z}"
+              rpy="0 0 ${(ang+90)*DEG2RAD}"/>
       <geometry>
-        <box size="${bumper_length} ${bumper_thickness} ${bumper_height}"/>
+        <box size="${width} ${bumper_thickness} ${bumper_height}"/>
       </geometry>
       <material name="dark"/>
     </visual>
-    <collision name="${name}">
-      <origin xyz="${(base_diameter/2)*cos(angle*DEG2RAD)} ${(base_diameter/2)*sin(angle*DEG2RAD)} ${bumper_z}"
-              rpy="0 0 ${(angle+90)*DEG2RAD}"/>
+    <collision name="${prefix}_${idx}">
+      <origin xyz="${(base_diameter/2)*cos(ang*DEG2RAD)} ${(base_diameter/2)*sin(ang*DEG2RAD)} ${bumper_z}"
+              rpy="0 0 ${(ang+90)*DEG2RAD}"/>
       <geometry>
-        <box size="${bumper_length} ${bumper_thickness} ${bumper_height}"/>
+        <box size="${width} ${bumper_thickness} ${bumper_height}"/>
       </geometry>
     </collision>
+  </xacro:macro>
+
+  <!-- A 90-deg bumper half built from 'n' facets spanning a0 .. a0+90 deg.
+       Facet width = arc chord * 1.15 so neighbours overlap (continuous, no gaps). -->
+  <xacro:macro name="bumper_arc" params="prefix a0 n i:=0">
+    <xacro:if value="${i &lt; n}">
+      <xacro:bumper_facet prefix="${prefix}" idx="${i}"
+        ang="${a0 + (i + 0.5) * (90.0 / n)}"
+        width="${2 * (base_diameter/2) * sin(0.5 * (90.0/n) * DEG2RAD) * 1.15}"/>
+      <xacro:bumper_arc prefix="${prefix}" a0="${a0}" n="${n}" i="${i + 1}"/>
+    </xacro:if>
   </xacro:macro>
 
   <link name="base_footprint"/>
@@ -52,9 +62,10 @@
       </geometry>
     </collision>
 
-    <!-- Front bumpers as named collisions on base_link (see macro above) -->
-    <xacro:front_bumper name="bumper_left_collision" angle="${bumper_angle}"/>
-    <xacro:front_bumper name="bumper_right_collision" angle="${-bumper_angle}"/>
+    <!-- Continuous front bumper = front 180 deg of the cylinder wall (named
+         collisions on base_link). Left half 0..+90 deg, right half -90..0 deg. -->
+    <xacro:bumper_arc prefix="bumper_left" a0="0" n="${bumper_facets_per_side}"/>
+    <xacro:bumper_arc prefix="bumper_right" a0="-90" n="${bumper_facets_per_side}"/>
 
     <xacro:solid_cylinder_inertia m="${lower_cylinder_mass}" r="${base_diameter/2}" h="${lower_cylinder_height}"/>
   </link>

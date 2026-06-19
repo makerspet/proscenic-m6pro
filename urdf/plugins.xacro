@@ -35,15 +35,23 @@
     <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
   </gazebo>
 
-  <!-- Front bumper contact sensors. They watch the named bumper collisions on
-       base_link (see robot.urdf.xacro) and publish gz.msgs.Contacts, bridged to
-       ROS as ros_gz_interfaces/msg/Contacts (see config/gz_bridge.yaml). -->
+  <!-- Lists all facet collision names for one bumper half, for the contact sensor. -->
+  <xacro:macro name="bumper_facet_collisions" params="prefix n i:=0">
+    <xacro:if value="${i &lt; n}">
+      <collision>${prefix}_${i}</collision>
+      <xacro:bumper_facet_collisions prefix="${prefix}" n="${n}" i="${i + 1}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- Front bumper contact sensors. Each half watches all of its arc-facet
+       collisions on base_link (see robot.urdf.xacro) and publishes gz.msgs.Contacts,
+       bridged to ROS as ros_gz_interfaces/msg/Contacts (see config/gz_bridge.yaml). -->
   <gazebo reference="base_link">
     <sensor name="bumper_left" type="contact">
       <always_on>true</always_on>
       <update_rate>50</update_rate>
       <contact>
-        <collision>bumper_left_collision</collision>
+        <xacro:bumper_facet_collisions prefix="bumper_left" n="${bumper_facets_per_side}"/>
       </contact>
       <topic>bumper_left/contact</topic>
     </sensor>
@@ -51,7 +59,7 @@
       <always_on>true</always_on>
       <update_rate>50</update_rate>
       <contact>
-        <collision>bumper_right_collision</collision>
+        <xacro:bumper_facet_collisions prefix="bumper_right" n="${bumper_facets_per_side}"/>
       </contact>
       <topic>bumper_right/contact</topic>
     </sensor>

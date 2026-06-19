@@ -36,13 +36,16 @@
   <xacro:property name="laser_puck_mass" value="0.150"/>
   <!-- ****************** **************** ****************** -->
 
-  <!-- Front bumpers (left/right halves), approximated as thin boxes hugging the
-       front perimeter. Geometry is a rough placeholder - refine visually in sim. -->
-  <xacro:property name="bumper_angle" value="35"/>    <!-- deg from front for each half -->
-  <xacro:property name="bumper_length" value="0.13"/> <!-- tangential -->
-  <xacro:property name="bumper_thickness" value="0.012"/> <!-- radial -->
-  <xacro:property name="bumper_height" value="0.045"/>
-  <xacro:property name="bumper_z" value="0.022"/>     <!-- center height in base_link frame -->
+  <!-- Front bumper = the front 180 deg of the body's cylindrical wall, modelled as
+       a continuous faceted arc. Left half spans 0..+90 deg, right half -90..0 deg
+       (they meet at the front, 0 deg, so there is no dead-center gap). Each half is
+       'bumper_facets_per_side' thin box facets, named so the contact sensors can
+       reference them; facets sit at the body radius and protrude a few mm so they
+       are the surface that touches obstacles. -->
+  <xacro:property name="bumper_facets_per_side" value="6"/>
+  <xacro:property name="bumper_thickness" value="0.010"/> <!-- radial; outer face ~5mm proud -->
+  <xacro:property name="bumper_height" value="0.050"/>
+  <xacro:property name="bumper_z" value="0.033"/>     <!-- center height in base_link frame -->
 
   <xacro:property name="DEG2RAD" value="0.0174533"/>
 </robot>
