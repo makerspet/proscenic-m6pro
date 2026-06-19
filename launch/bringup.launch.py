@@ -49,10 +49,15 @@ from kaiaai import config
 
 def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
     robot_model_str = context.perform_substitution(robot_model)
+    robot_ip_str = context.perform_substitution(robot_ip)
     use_sim_time_str = context.perform_substitution(use_sim_time)
 
     if len(robot_model_str) == 0:
         robot_model_str = config.get_var('robot.model')
+
+    # Robot IP precedence: explicit robot_ip:= arg > 'kaia config robot.ip' > default.
+    if len(robot_ip_str) == 0:
+        robot_ip_str = config.get_var('robot.ip') or '192.168.1.143'
 
     description_package_path = get_package_share_path(robot_model_str)
 
@@ -72,6 +77,7 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
     print('URDF file   : {}'.format(urdf_path_name))
     print('EKF params  : {}'.format(ekf_path_name))
     print('Bridge launch: {}'.format(bridge_launch_path_name))
+    print('Robot IP    : {}'.format(robot_ip_str))
 
     return [
         # 1. SangamIO <-> ROS 2 bridge. Frame IDs reconciled to the kaiaai
@@ -79,7 +85,7 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(bridge_launch_path_name),
             launch_arguments={
-                'robot_ip': robot_ip,
+                'robot_ip': robot_ip_str,
                 'frame_id': 'base_footprint',
                 'odom_frame_id': 'odom',
                 'lidar_frame_id': 'base_scan',
@@ -117,8 +123,9 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             name='robot_ip',
-            default_value='192.168.1.143',
-            description='IP address of the Proscenic vacuum running SangamIO'
+            default_value='',
+            description="Proscenic vacuum IP (SangamIO). If empty, uses "
+                        "'kaia config robot.ip', else 192.168.1.143."
         ),
         DeclareLaunchArgument(
             name='use_sim_time',

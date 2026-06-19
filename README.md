@@ -49,6 +49,12 @@ ros2 launch kaiaai_bringup navigation.launch.py slam:=True
 ros2 run kaiaai_teleop teleop_keyboard
 ros2 run nav2_map_server map_saver_cli -f ~/maps/map
 ```
+You can store the robot IP once instead of passing `robot_ip:=` every time:
+```
+kaia config robot.ip <robot-ip>
+ros2 launch proscenic_m6pro bringup.launch.py
+```
+(Precedence: an explicit `robot_ip:=` wins, otherwise `kaia config robot.ip`, otherwise 192.168.1.143.)
 
 ## Notes
 - URDF dimensions are approximate (~349 mm diameter, ~95 mm height, 0.233 m wheel base to
