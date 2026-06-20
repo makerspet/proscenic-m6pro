@@ -102,6 +102,21 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
                 'robot_description': robot_description
             }]
         ),
+        # 2b. Publish /joint_states for the (continuous) wheel joints. In Gazebo the
+        #     sim plugin publishes these; on the physical robot nothing does, so
+        #     robot_state_publisher cannot compute wheel_left/right_link transforms
+        #     ("No transform to odom" in RViz). The wheels are spun for display only
+        #     (held at 0); their motion is captured by /odom, not these joints.
+        Node(
+            package='joint_state_publisher',
+            executable='joint_state_publisher',
+            name='joint_state_publisher',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'robot_description': robot_description
+            }]
+        ),
         # 3. EKF: provides odom -> base_footprint TF (bridge does not).
         Node(
             package='robot_localization',

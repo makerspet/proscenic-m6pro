@@ -23,6 +23,12 @@ ekf_filter_node:
     publish_tf: true
     print_diagnostics: false
 
+    # Publish the TF stamped at the current time (predicted forward from the last
+    # measurement) instead of at the last measurement time. Without this the
+    # odom->base_footprint TF lags the /scan stamp and RViz/cartographer report
+    # "extrapolation into the future" looking up base_scan -> odom.
+    predict_to_current_time: true
+
     map_frame: map
     odom_frame: odom
     base_link_frame: base_footprint
@@ -39,14 +45,18 @@ ekf_filter_node:
     odom0_relative: false
     odom0_queue_size: 10
 
-    # IMU: fuse yaw rate only (no orientation available from the bridge).
-    imu0: /imu
-    imu0_config: [false, false, false,
-                  false, false, false,
-                  false, false, false,
-                  false, false, true,
-                  false, false, false]
-    imu0_differential: false
-    imu0_relative: false
-    imu0_queue_size: 10
-    imu0_remove_gravitational_acceleration: true
+    # IMU fusion is DISABLED. The SangamIO/Proscenic gyro currently reports yaw
+    # rate with the wrong sign and ~2-3x scale (and the accel axes are off), which
+    # dragged the fused heading backwards and too fast. Wheel odometry alone gives
+    # an accurate /odom, so we fuse only that. Re-enable once the gyro axis/scale
+    # is corrected in sangamio.toml (imu_gyro transform + gyro scale).
+    # imu0: /imu
+    # imu0_config: [false, false, false,
+    #               false, false, false,
+    #               false, false, false,
+    #               false, false, true,
+    #               false, false, false]
+    # imu0_differential: false
+    # imu0_relative: false
+    # imu0_queue_size: 10
+    # imu0_remove_gravitational_acceleration: true
