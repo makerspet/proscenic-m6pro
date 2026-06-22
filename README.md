@@ -10,6 +10,9 @@ Tutorial: Step-by-step [bringup &amp; SLAM tutorial](https://makerspet.com/blog/
 
 ![Proscenic M6 Pro robot vacuum cleaner](https://makerspet.com/wp-content/uploads/2026/06/proscenic_m6_pro_ros2_floor.webp)
 
+<img width="1200" height="1200" alt="oomwoo_ros2_gazebo_living_room_simulation" src="https://github.com/user-attachments/assets/0bdb7ca0-746a-4dd5-bb29-26f71b953d6a" />
+
+
 ## Package contents
 - `urdf/` — xacro description of the ~349 mm round vacuum (body + LiDAR turret, diff-drive
   wheels, caster). Frames follow the Kaia.ai convention: `base_footprint → base_link → base_scan`.
