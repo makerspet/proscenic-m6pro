@@ -1,20 +1,14 @@
 # Proscenic M6 Pro — ROS 2 robot description
 
-ROS 2 robot description and configuration for the **Proscenic M6 Pro** robot vacuum,
-integrated with the [Kaia.ai](https://kaia.ai) software [platform](https://github.com/kaiaai/).
+ROS 2 robot description and configuration for the **Proscenic M6 Pro** consumer robot vacuum,
+bridged to ROS 2 using [remakeai/vacuum_ros2_bridge](https://github.com/remakeai/vacuum_ros2_bridge) and
+[SangamIO](https://github.com/codetiger/VacuumTiger) firmware daemon.
+
+Tutorial: Step-by-step [root &amp; setup tutorial](https://makerspet.com/blog/tutorial-connect-robot-vacuum-cleaner-to-ros-2-proscenic-m6-pro/)
+
+Tutorial: Step-by-step [bringup &amp; SLAM tutorial](https://makerspet.com/blog/tutorial-part-2-drive-map-navigate-your-proscenic-m6-pro-in-ros-2/)
 
 ![Proscenic M6 Pro robot vacuum cleaner](https://makerspet.com/wp-content/uploads/2026/06/proscenic_m6_pro_ros2_floor.webp)
-
-Unlike the ESP32 + [micro-ROS](https://micro.ros.org/) Maker's Pet robots, the Proscenic
-M6 Pro is a stock commercial vacuum. It is bridged to ROS 2 by
-[`remakeai/vacuum_ros2_bridge`](https://github.com/remakeai/vacuum_ros2_bridge), which talks
-to the on-board **SangamIO** daemon (part of [VacuumTiger](https://github.com/codetiger/VacuumTiger))
-over TCP port 5555. Setup is documented in this
-[tutorial](https://makerspet.com/blog/tutorial-connect-robot-vacuum-cleaner-to-ros-2-proscenic-m6-pro/).
-
-```
-Proscenic M6 Pro (SangamIO, TCP 5555) <--Wi-Fi/LAN--> PC (vacuum_ros2_bridge) <--> ROS 2
-```
 
 ## Package contents
 - `urdf/` — xacro description of the ~349 mm round vacuum (body + LiDAR turret, diff-drive
