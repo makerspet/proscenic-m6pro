@@ -8,6 +8,9 @@ Tutorial: Step-by-step [root &amp; setup tutorial](https://makerspet.com/blog/tu
 
 Tutorial: Step-by-step [bringup &amp; SLAM tutorial](https://makerspet.com/blog/tutorial-part-2-drive-map-navigate-your-proscenic-m6-pro-in-ros-2/)
 
+Tutorial: Step-by-step [simulate in Gazebo](https://makerspet.com/blog/simulate-the-proscenic-m6-pro-robot-vacuum-in-gazebo-with-ros-2/)
+
+
 ![Proscenic M6 Pro robot vacuum cleaner](https://makerspet.com/wp-content/uploads/2026/06/proscenic_m6_pro_ros2_floor.webp)
 
 <img width="1200" height="1200" alt="oomwoo_ros2_gazebo_living_room_simulation" src="https://github.com/user-attachments/assets/0bdb7ca0-746a-4dd5-bb29-26f71b953d6a" />
