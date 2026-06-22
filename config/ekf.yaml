@@ -18,16 +18,16 @@ ekf_filter_node:
     frequency: 30.0
     sensor_timeout: 0.1
     two_d_mode: true
-    transform_time_offset: 0.0
+    # Small forward offset on the published TF timestamp gives RViz/cartographer a
+    # cushion so a /scan stamped slightly ahead of the latest TF still resolves
+    # (the "extrapolation into the future" warning) WITHOUT extrapolating the pose.
+    # NB: do NOT use predict_to_current_time here -- it projects pose by
+    # velocity*(now-stamp), which makes the robot model race ahead of /odom when
+    # message timestamps lag (e.g. over an SSH tunnel).
+    transform_time_offset: 0.05
     transform_timeout: 0.0
     publish_tf: true
     print_diagnostics: false
-
-    # Publish the TF stamped at the current time (predicted forward from the last
-    # measurement) instead of at the last measurement time. Without this the
-    # odom->base_footprint TF lags the /scan stamp and RViz/cartographer report
-    # "extrapolation into the future" looking up base_scan -> odom.
-    predict_to_current_time: true
 
     map_frame: map
     odom_frame: odom
