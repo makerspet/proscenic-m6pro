@@ -47,10 +47,11 @@ from launch_ros.parameter_descriptions import ParameterValue
 from kaiaai import config
 
 
-def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
+def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_ekf):
     robot_model_str = context.perform_substitution(robot_model)
     robot_ip_str = context.perform_substitution(robot_ip)
     use_sim_time_str = context.perform_substitution(use_sim_time)
+    use_ekf = context.perform_substitution(use_ekf).lower() == 'true'
 
     if len(robot_model_str) == 0:
         robot_model_str = config.get_var('robot.model')
@@ -78,10 +79,13 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
     print('EKF params  : {}'.format(ekf_path_name))
     print('Bridge launch: {}'.format(bridge_launch_path_name))
     print('Robot IP    : {}'.format(robot_ip_str))
+    print('Use EKF     : {}'.format(use_ekf))
 
-    return [
+    nodes = [
         # 1. SangamIO <-> ROS 2 bridge. Frame IDs reconciled to the kaiaai
         #    convention: odom child = base_footprint, LiDAR frame = base_scan.
+        #    When the EKF is off, the bridge broadcasts odom -> base_footprint
+        #    itself (publish_tf); when on, the EKF owns that transform.
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(bridge_launch_path_name),
             launch_arguments={
@@ -89,6 +93,7 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
                 'frame_id': 'base_footprint',
                 'odom_frame_id': 'odom',
                 'lidar_frame_id': 'base_scan',
+                'publish_tf': 'false' if use_ekf else 'true',
             }.items()
         ),
         # 2. URDF + static TF tree.
@@ -117,15 +122,23 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time):
                 'robot_description': robot_description
             }]
         ),
-        # 3. EKF: provides odom -> base_footprint TF (bridge does not).
-        Node(
+    ]
+
+    # 3. EKF (optional, OFF by default). When enabled it fuses odometry and
+    #    publishes odom -> base_footprint. It is off by default while IMU fusion
+    #    is on hold: the bridge provides that TF straight from wheel odometry,
+    #    which is simpler to debug (no EKF velocity-integration layer). Re-enable
+    #    with use_ekf:=true once the IMU is calibrated and worth fusing.
+    if use_ekf:
+        nodes.append(Node(
             package='robot_localization',
             executable='ekf_node',
             name='ekf_filter_node',
             output='screen',
             parameters=[ekf_path_name, {'use_sim_time': use_sim_time}]
-        ),
-    ]
+        ))
+
+    return nodes
 
 
 def generate_launch_description():
@@ -148,9 +161,18 @@ def generate_launch_description():
             choices=['true', 'false'],
             description='Use simulation (Gazebo) clock if true'
         ),
+        DeclareLaunchArgument(
+            name='use_ekf',
+            default_value='false',
+            choices=['true', 'false'],
+            description='Run the robot_localization EKF for odom->base_footprint. '
+                        'Off by default: the bridge publishes that TF from wheel '
+                        'odometry. Enable once IMU fusion is calibrated.'
+        ),
         OpaqueFunction(function=make_nodes, args=[
             LaunchConfiguration('robot_model'),
             LaunchConfiguration('robot_ip'),
             LaunchConfiguration('use_sim_time'),
+            LaunchConfiguration('use_ekf'),
         ]),
     ])
