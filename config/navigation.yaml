@@ -175,8 +175,11 @@ local_costmap:
       plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.22
-        cost_scaling_factor: 2.58
+        # Tight for a vacuum: it should hug walls/furniture to clean edges, not
+        # balloon away from them. inflation_radius just above the inscribed radius
+        # (robot_radius 0.1745) with a steep cost falloff.
+        inflation_radius: 0.20
+        cost_scaling_factor: 5.0
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: true
@@ -263,8 +266,11 @@ global_costmap:
         transform_tolerance: 5.0
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        inflation_radius: 0.22
-        cost_scaling_factor: 2.58
+        # Tight for a vacuum: it should hug walls/furniture to clean edges, not
+        # balloon away from them. inflation_radius just above the inscribed radius
+        # (robot_radius 0.1745) with a steep cost falloff.
+        inflation_radius: 0.20
+        cost_scaling_factor: 5.0
       always_send_full_costmap: true
 
 map_server:
