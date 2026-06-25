@@ -36,6 +36,7 @@
 #   ros2 launch proscenic_m6pro bringup.launch.py robot_ip:=<robot-ip>
 
 import os
+import yaml
 from ament_index_python.packages import get_package_share_path
 from launch import LaunchDescription, LaunchContext
 from launch.actions import (DeclareLaunchArgument, OpaqueFunction,
@@ -54,8 +55,8 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_
     use_sim_time_str = context.perform_substitution(use_sim_time)
     use_ekf = context.perform_substitution(use_ekf).lower() == 'true'
     robot_port_str = context.perform_substitution(robot_port)
-    scan_time_offset_str = context.perform_substitution(scan_time_offset)
-    scan_mask_deg_str = context.perform_substitution(scan_mask_deg)
+    scan_time_offset_arg = context.perform_substitution(scan_time_offset)
+    scan_mask_deg_arg = context.perform_substitution(scan_mask_deg)
 
     if len(robot_model_str) == 0:
         robot_model_str = config.get_var('robot.model')
@@ -73,6 +74,24 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_
     bridge_launch_path_name = os.path.join(
         get_package_share_path('vacuum_ros2_bridge'),
         'launch', 'bridge.launch.py')
+
+    # Robot-specific bridge tuning (scan_time_offset, scan_mask_deg) lives in
+    # config/vacuum_bridge.yaml so it stays out of the launch command. A non-empty
+    # command-line arg still overrides the file (handy for live calibration).
+    vacuum_bridge_yaml = os.path.join(
+        description_package_path, 'config', 'vacuum_bridge.yaml')
+    bridge_cfg = {}
+    try:
+        with open(vacuum_bridge_yaml) as f:
+            doc = yaml.safe_load(f) or {}
+        for section in doc.values():
+            if isinstance(section, dict) and 'ros__parameters' in section:
+                bridge_cfg = section['ros__parameters']
+                break
+    except FileNotFoundError:
+        pass
+    scan_time_offset_str = scan_time_offset_arg or str(bridge_cfg.get('scan_time_offset', 0.0))
+    scan_mask_deg_str = scan_mask_deg_arg or str(bridge_cfg.get('scan_mask_deg', ''))
 
     robot_description = ParameterValue(
         Command(['xacro ', urdf_path_name]), value_type=str)
@@ -184,14 +203,15 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             name='scan_time_offset',
-            default_value='0.0',
-            description='Seconds added to each /scan stamp (negative back-dates it '
-                        'to when measured; fixes scan lag during rotation).'
+            default_value='',
+            description='Override config/vacuum_bridge.yaml scan_time_offset (s). '
+                        'Empty = use the value in that file.'
         ),
         DeclareLaunchArgument(
             name='scan_mask_deg',
             default_value='',
-            description="LiDAR fixed-pattern-noise mask 'min1,max1,...' in degrees."
+            description='Override config/vacuum_bridge.yaml scan_mask_deg (deg). '
+                        'Empty = use the value in that file.'
         ),
         OpaqueFunction(function=make_nodes, args=[
             LaunchConfiguration('robot_model'),
