@@ -47,11 +47,15 @@ from launch_ros.parameter_descriptions import ParameterValue
 from kaiaai import config
 
 
-def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_ekf):
+def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_ekf,
+               robot_port, scan_time_offset, scan_mask_deg):
     robot_model_str = context.perform_substitution(robot_model)
     robot_ip_str = context.perform_substitution(robot_ip)
     use_sim_time_str = context.perform_substitution(use_sim_time)
     use_ekf = context.perform_substitution(use_ekf).lower() == 'true'
+    robot_port_str = context.perform_substitution(robot_port)
+    scan_time_offset_str = context.perform_substitution(scan_time_offset)
+    scan_mask_deg_str = context.perform_substitution(scan_mask_deg)
 
     if len(robot_model_str) == 0:
         robot_model_str = config.get_var('robot.model')
@@ -90,10 +94,13 @@ def make_nodes(context: LaunchContext, robot_model, robot_ip, use_sim_time, use_
             PythonLaunchDescriptionSource(bridge_launch_path_name),
             launch_arguments={
                 'robot_ip': robot_ip_str,
+                'robot_port': robot_port_str,
                 'frame_id': 'base_footprint',
                 'odom_frame_id': 'odom',
                 'lidar_frame_id': 'base_scan',
                 'publish_tf': 'false' if use_ekf else 'true',
+                'scan_time_offset': scan_time_offset_str,
+                'scan_mask_deg': scan_mask_deg_str,
             }.items()
         ),
         # 2. URDF + static TF tree.
@@ -169,10 +176,30 @@ def generate_launch_description():
                         'Off by default: the bridge publishes that TF from wheel '
                         'odometry. Enable once IMU fusion is calibrated.'
         ),
+        DeclareLaunchArgument(
+            name='robot_port',
+            default_value='5555',
+            description='SangamIO TCP port. Change when port-forwarding several '
+                        'vacuums through one firewall on distinct ports.'
+        ),
+        DeclareLaunchArgument(
+            name='scan_time_offset',
+            default_value='0.0',
+            description='Seconds added to each /scan stamp (negative back-dates it '
+                        'to when measured; fixes scan lag during rotation).'
+        ),
+        DeclareLaunchArgument(
+            name='scan_mask_deg',
+            default_value='',
+            description="LiDAR fixed-pattern-noise mask 'min1,max1,...' in degrees."
+        ),
         OpaqueFunction(function=make_nodes, args=[
             LaunchConfiguration('robot_model'),
             LaunchConfiguration('robot_ip'),
             LaunchConfiguration('use_sim_time'),
             LaunchConfiguration('use_ekf'),
+            LaunchConfiguration('robot_port'),
+            LaunchConfiguration('scan_time_offset'),
+            LaunchConfiguration('scan_mask_deg'),
         ]),
     ])
